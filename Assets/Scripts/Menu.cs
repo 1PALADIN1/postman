@@ -68,14 +68,10 @@ namespace Core
                         case UIMarker.PanelMainMenu:
                             _mainMenuPanel = view;
                             _mainMenuPanel.SetActive(true);
-                            _adaptiveView.AdaptateToPanelPosition(panel.GetAllChildButtonsAsBase(), panel, true);
                             break;
                         case UIMarker.PanelLevelList:
                             _levelPanel = view;
                             _levelPanel.SetActive(false);
-
-                            //TODO test feature
-                            _adaptiveView.AdaptateToPanelPosition(panel.GetAllChildButtonsAsBase(), panel, true, _buttonsInColumn, _buttonsInRow);
                             break;
                     }
                 }
@@ -95,7 +91,13 @@ namespace Core
                             break;
                     }
                 }
+            }
 
+            //адаптация кнопок к представлению
+            if (_levelPanel is IPanel)
+            {
+                IPanel panel = _levelPanel as IPanel;
+                _adaptiveView.AdaptateToPanelPosition(panel.GetAllChildButtonsAsBase(), panel, true, _buttonsInColumn, _buttonsInRow);
             }
         }
 
@@ -128,9 +130,7 @@ namespace Core
         {
             ClearLevelButtons();
 
-            float insideButsX = _panelWidth * (1 - _widthPercent * 2) / _buttonsInColumn;
-            float insideButsY = _panelHeight * (1 - (_heightPercentTop + _heightPercentBottom)) / _buttonsInRow;
-
+            List<BaseView> baseButtons = new List<BaseView>();
             int[] pageElements = _pager.GetPage(pageNum);
             int levelCount = 0;
             bool isFinished = false;
@@ -152,10 +152,9 @@ namespace Core
                     if (buttonView != null)
                     {
                         buttonView.Init();
-                        
                         buttonView.Text = pageElements[levelCount].ToString();
                         buttonView.Level = pageElements[levelCount];
-
+                        baseButtons.Add(buttonView);
                         levelCount++;
                     }
                 }
@@ -163,6 +162,14 @@ namespace Core
                 //выход из двойного цикла
                 if (isFinished)
                     break;
+            }
+
+            //TODO test feature
+            //адаптация кнопок к представлению
+            if (_levelPanel is IPanel)
+            {
+                IPanel panel = _levelPanel as IPanel;
+                _adaptiveView.AdaptateToPanelPosition(baseButtons.ToArray(), panel, true, _buttonsInColumn, _buttonsInRow);
             }
         }
 
