@@ -69,12 +69,12 @@ namespace Core.Helper
         /// <summary>
         /// Проверка на наличие следующего уровня
         /// </summary>
-        /// <param name="currentLevelNumber">Номер текущего уровня</param>
+        /// <param name="currentLevelNumber">Номер текущего уровня (начиная с 1, а не с 0)</param>
         /// <returns>Возвращает true, если есть следующий уровень, иначе - false</returns>
         public bool HasNextLevel(int currentLevelNumber)
         {
             currentLevelNumber++;
-            if (currentLevelNumber > _levelsNum.Count - 1)
+            if (currentLevelNumber > _levelsNum.Count)
                 return false;
             return true;
         }
