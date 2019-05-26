@@ -68,13 +68,14 @@ namespace Core
                         case UIMarker.PanelMainMenu:
                             _mainMenuPanel = view;
                             _mainMenuPanel.SetActive(true);
-
-                            //TODO new feature
                             _adaptiveView.AdaptateToPanelPosition(panel.GetAllChildButtonsAsBase(), panel, true);
                             break;
                         case UIMarker.PanelLevelList:
                             _levelPanel = view;
                             _levelPanel.SetActive(false);
+
+                            //TODO test feature
+                            _adaptiveView.AdaptateToPanelPosition(panel.GetAllChildButtonsAsBase(), panel, true, _buttonsInColumn, _buttonsInRow);
                             break;
                     }
                 }
@@ -151,10 +152,6 @@ namespace Core
                     if (buttonView != null)
                     {
                         buttonView.Init();
-                        buttonView.SetPosition(_panelWidth * _widthPercent + insideButsX * i + insideButsX / 2,
-                                                -(_panelHeight * _heightPercentTop + insideButsY * j + insideButsY / 2));
-
-                        _adaptiveView.AdaptateSize(buttonView);
                         
                         buttonView.Text = pageElements[levelCount].ToString();
                         buttonView.Level = pageElements[levelCount];

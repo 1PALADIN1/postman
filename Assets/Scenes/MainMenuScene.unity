@@ -710,6 +710,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _marker: 3
+  _paddingTop: 0.1
+  _paddingBottom: 0.1
+  _paddingLeft: 0.1
+  _paddingRight: 0.1
 --- !u!1 &2019952975
 GameObject:
   m_ObjectHideFlags: 0
@@ -798,3 +802,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _marker: 4
+  _paddingTop: 0.1
+  _paddingBottom: 0.25
+  _paddingLeft: 0.1
+  _paddingRight: 0.1

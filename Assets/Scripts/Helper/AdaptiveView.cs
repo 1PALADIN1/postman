@@ -59,9 +59,11 @@ namespace Core.Helper
                 BaseView currentElement = views[i];
                 RectTransform elementRectTransform = currentElement.GetComponent<RectTransform>();
                 j = i / numInColumn;
-                
-                _tmpVector2.Set(panelWidth * panel.PaddingLeft + insideButsX * i + insideButsX / 2,
+                int i_pos = i % numInColumn;
+
+                _tmpVector2.Set(panelWidth * panel.PaddingLeft + insideButsX * i_pos + insideButsX / 2,
                                 -(panelHeight * panel.PaddingTop + insideButsY * j + insideButsY / 2));
+
                 elementRectTransform.anchoredPosition = _tmpVector2;
 
                 if (adaptSize)
