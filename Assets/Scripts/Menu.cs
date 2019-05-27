@@ -37,6 +37,7 @@ namespace Core
         private List<IPanel> _panelList;
         private BaseView _mainMenuPanel;
         private BaseView _levelPanel;
+        private BaseView _abouPanel;
 
         private void Start()
         {
@@ -49,8 +50,7 @@ namespace Core
 
             InitPager();
             LoadPage(_pager.CurrentPageNumber);
-
-            //TODO подстроить весь код под архитектуру ниже
+            
             _panelList = new List<IPanel>();
 
             foreach (var view in GameObject.FindObjectsOfType<BaseView>())
@@ -73,6 +73,10 @@ namespace Core
                             _levelPanel = view;
                             _levelPanel.SetActive(false);
                             break;
+                        case UIMarker.PanelAbout:
+                            _abouPanel = view;
+                            _abouPanel.SetActive(false);
+                            break;
                     }
                 }
 
@@ -88,6 +92,15 @@ namespace Core
                             break;
                         case UIMarker.ButtonLevel:
                             button.SetAction(StartLevel);
+                            break;
+                        case UIMarker.ButtonAbout:
+                            button.SetAction(OpenAboutPanel);
+                            break;
+                        case UIMarker.ButtonQuit:
+                            button.SetAction(QuitGame);
+                            break;
+                        case UIMarker.ButtonBackToMainMenu:
+                            button.SetAction(BackToMenu);
                             break;
                     }
                 }
@@ -117,6 +130,33 @@ namespace Core
         private void StartLevel()
         {
             SceneManager.LoadScene("LevelScene");
+        }
+
+        /// <summary>
+        /// Выход из игры
+        /// </summary>
+        private void QuitGame()
+        {
+            Application.Quit();
+        }
+
+        /// <summary>
+        /// Открытие окна "Об игре"
+        /// </summary>
+        private void OpenAboutPanel()
+        {
+            _mainMenuPanel.SetActive(false);
+            _abouPanel.SetActive(true);
+        }
+
+        /// <summary>
+        /// Возвращение в гланове меню
+        /// </summary>
+        private void BackToMenu()
+        {
+            if (_abouPanel.IsActive) _abouPanel.SetActive(false);
+            if (_levelPanel.IsActive) _levelPanel.SetActive(false);
+            _mainMenuPanel.SetActive(true);
         }
         #endregion
 
@@ -164,7 +204,6 @@ namespace Core
                     break;
             }
 
-            //TODO test feature
             //адаптация кнопок к представлению
             if (_levelPanel is IPanel)
             {
