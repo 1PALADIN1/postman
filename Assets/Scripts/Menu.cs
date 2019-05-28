@@ -91,7 +91,7 @@ namespace Core
                             button.SetAction(OpenLevelList);
                             break;
                         case UIMarker.ButtonLevel:
-                            button.SetAction(StartLevel);
+                            //button.SetAction(StartLevel);
                             break;
                         case UIMarker.ButtonAbout:
                             button.SetAction(OpenAboutPanel);
@@ -194,6 +194,7 @@ namespace Core
                         buttonView.Init();
                         buttonView.Text = pageElements[levelCount].ToString();
                         buttonView.Level = pageElements[levelCount];
+                        buttonView.SetAction(StartLevel);
                         baseButtons.Add(buttonView);
                         levelCount++;
                     }
