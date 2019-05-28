@@ -54,6 +54,9 @@ namespace Core.View
             _allChildButtonsAsBase = new List<BaseView>();
             foreach (var view in _allChildViews)
             {
+                if (view.IsFixedPosition)
+                    continue;
+
                 if (view is IButton)
                 {
                     _allChildButtons.Add(view as IButton);

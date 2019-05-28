@@ -41,7 +41,7 @@ namespace Core
 
         private void Start()
         {
-            _levelsPanel = GameObject.Find("LevelsPanel");
+            _levelsPanel = GameObject.Find("LevelButtons");
             Rect panelRect = _levelsPanel.GetComponent<RectTransform>().rect;
             _panelWidth = panelRect.width;
             _panelHeight = panelRect.height;
