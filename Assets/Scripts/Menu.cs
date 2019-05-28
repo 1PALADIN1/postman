@@ -34,10 +34,15 @@ namespace Core
         private LevelChecker _levelChecker;
         private AdaptiveView _adaptiveView;
 
+        //панельки
         private List<IPanel> _panelList;
         private BaseView _mainMenuPanel;
         private BaseView _levelPanel;
         private BaseView _abouPanel;
+
+        //кнопки
+        private BaseView _nextPageButton;
+        private BaseView _prevPageButton;
 
         private void Start()
         {
@@ -102,6 +107,14 @@ namespace Core
                         case UIMarker.ButtonBackToMainMenu:
                             button.SetAction(BackToMenu);
                             break;
+                        case UIMarker.ButtonNextPage:
+                            button.SetAction(GoNextPage);
+                            _nextPageButton = view;
+                            break;
+                        case UIMarker.ButtonPreviousPage:
+                            button.SetAction(GoPreviousPage);
+                            _prevPageButton = view;
+                            break;
                     }
                 }
             }
@@ -122,6 +135,8 @@ namespace Core
         {
             _mainMenuPanel.SetActive(false);
             _levelPanel.SetActive(true);
+
+            ActivatePageButtons();
         }
 
         /// <summary>
@@ -158,7 +173,50 @@ namespace Core
             if (_levelPanel.IsActive) _levelPanel.SetActive(false);
             _mainMenuPanel.SetActive(true);
         }
+
+        /// <summary>
+        /// Перелистывает на страницу вперёд
+        /// </summary>
+        private void GoNextPage()
+        {
+            LoadPage(_pager.GetNextPageNumber());
+            ActivatePageButtons();
+        }
+
+        /// <summary>
+        /// Перелистывает на предыдущую страницу
+        /// </summary>
+        private void GoPreviousPage()
+        {
+            LoadPage(_pager.GetPrevPageNumber());
+            ActivatePageButtons();
+        }
         #endregion
+
+        private void ActivatePageButtons()
+        {
+            if (_pager.HasNextPage)
+            {
+                if (!_nextPageButton.IsActive)
+                    _nextPageButton.SetActive(true);
+            }
+            else
+            {
+                if (_nextPageButton.IsActive)
+                    _nextPageButton.SetActive(false);
+            }
+
+            if (_pager.HasPrevPage)
+            {
+                if (!_prevPageButton.IsActive)
+                    _prevPageButton.SetActive(true);
+            }
+            else
+            {
+                if (_prevPageButton.IsActive)
+                    _prevPageButton.SetActive(false);
+            }
+        }
 
         private void InitPager()
         {
@@ -230,11 +288,11 @@ namespace Core
         {
             //TODO debug
             if (Input.GetKeyDown(KeyCode.P))
-                LoadPage(_pager.GetNextPageNumber());
+                GoNextPage();
 
             //TODO debug
             if (Input.GetKeyDown(KeyCode.O))
-                LoadPage(_pager.GetPrevPageNumber());
+                GoPreviousPage();
         }
     }
 }
