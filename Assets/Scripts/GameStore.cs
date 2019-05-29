@@ -162,6 +162,29 @@ namespace Core
 
             _nextLevelButton?.SetActive(false);
             _levelFinishView?.SetActive(false);
+
+            //прочее
+            AdaptateCamera();
+        }
+
+        /// <summary>
+        /// Адаптация размера камеры к уровню
+        /// </summary>
+        private void AdaptateCamera()
+        {
+            Camera mainCamera = Camera.main;
+            Vector3 minVector = mainCamera.ViewportToWorldPoint(new Vector2(0, 0));
+            Vector3 maxVector = mainCamera.ViewportToWorldPoint(new Vector2(1, 1));
+            float xMin = minVector.x;
+            float yMin = minVector.y;
+            float xMax = maxVector.x;
+            float yMax = maxVector.y;
+
+            //TODO debug
+            Debug.Log($"{mainCamera.pixelWidth}x{mainCamera.pixelHeight}, {mainCamera.orthographicSize}");
+            //TODO debug
+            Debug.Log($"{mainCamera.ViewportToWorldPoint(new Vector2(0, 0))}x{mainCamera.ViewportToWorldPoint(new Vector2(1, 1))}\n" +
+                $"({mainCamera.rect.xMin}:{mainCamera.rect.yMin}) - ({mainCamera.rect.xMax}:{mainCamera.rect.yMax})");
         }
 
         /// <summary>
