@@ -10,6 +10,7 @@
         ButtonBackToMainMenu = 104,
         ButtonNextPage = 105,
         ButtonPreviousPage = 106,
+        ButtonNextLevel = 107,
         PanelMainMenu = 500,
         PanelLevelList = 501,
         PanelAbout = 502

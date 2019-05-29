@@ -47,6 +47,7 @@ namespace Core
 
         //представления
         private LevelFinishView _levelFinishView;
+        private BaseView _nextLevelButton;
 
         private static GameStore _instance;
 
@@ -145,8 +146,21 @@ namespace Core
                 if (view is LevelFinishView) _levelFinishView = (LevelFinishView)view;
 
                 view.Init();
+
+                if (view is IButton)
+                {
+                    IButton button = view as IButton;
+                    switch (view.UIMarker)
+                    {
+                        case UIMarker.ButtonNextLevel:
+                            button.SetAction(LoadNextLevel);
+                            _nextLevelButton = view;
+                            break;
+                    }
+                }
             }
 
+            _nextLevelButton?.SetActive(false);
             _levelFinishView?.SetActive(false);
         }
 
@@ -216,6 +230,18 @@ namespace Core
 
             _levelFinishView?.SetActive(true);
             _levelFinishView?.SetStarsFinished(_collectController.MaxStars, _collectController.CollectedStars);
+
+            //кнопка Дальше
+            if (LevelChecker.HasNextLevel(_currentLevel))
+            {
+                if (!_nextLevelButton.IsActive)
+                    _nextLevelButton.SetActive(true);
+            }
+            else
+            {
+                if (_nextLevelButton.IsActive)
+                    _nextLevelButton.SetActive(false);
+            }
         }
 
         /// <summary>
