@@ -172,17 +172,10 @@ namespace Core
         /// </summary>
         private void AdaptateCamera()
         {
-            Camera mainCamera = Camera.main;
-            Vector3 minVector = mainCamera.ViewportToWorldPoint(new Vector2(0, 0));
-            Vector3 maxVector = mainCamera.ViewportToWorldPoint(new Vector2(1, 1));
-
-            //координаты углов прямоугольника камеры
-            Border cameraBorder = new Border(minVector.x, minVector.y, maxVector.x, maxVector.y);
-
             //ищем координаты самых крайних объектов
             Vector3 modelPosition = _allModels[0].transform.position;
             Border modelBorder = new Border(modelPosition.x, modelPosition.y, modelPosition.x, modelPosition.y);
-            
+
             for (int i = 1; i < _allModels.Length; i++)
             {
                 modelPosition = _allModels[i].transform.position;
@@ -197,26 +190,29 @@ namespace Core
                     modelBorder.MinY = modelPosition.y;
             }
 
-            //TODO debug
-            Debug.Log($"Min: ({modelBorder.MinX}:{modelBorder.MinY}), max: ({modelBorder.MaxX}:{modelBorder.MaxY})");
+            Camera mainCamera = Camera.main;
+            bool isAdapted = false;
 
-            //адаптируем камеру
-            if (modelBorder.MaxX >= cameraBorder.MaxX ||
-                modelBorder.MaxY >= cameraBorder.MaxY ||
-                modelBorder.MinX <= cameraBorder.MinX ||
-                modelBorder.MinY <= cameraBorder.MinY)
+            while (!isAdapted)
             {
-                mainCamera.orthographicSize++;
+                Vector3 minVector = mainCamera.ViewportToWorldPoint(new Vector2(0, 0));
+                Vector3 maxVector = mainCamera.ViewportToWorldPoint(new Vector2(1, 1));
+                //координаты углов прямоугольника камеры
+                Border cameraBorder = new Border(minVector.x, minVector.y, maxVector.x, maxVector.y);
 
-                //TODO debug
-                Debug.Log($"Camera is adaptated to size {mainCamera.orthographicSize}");
+                //адаптируем камеру
+                if (modelBorder.MaxX >= cameraBorder.MaxX ||
+                    modelBorder.MaxY >= cameraBorder.MaxY ||
+                    modelBorder.MinX <= cameraBorder.MinX ||
+                    modelBorder.MinY <= cameraBorder.MinY)
+                {
+                    mainCamera.orthographicSize++;
+                }
+                else
+                {
+                    isAdapted = true;
+                }
             }
-
-            //TODO debug
-            Debug.Log($"{mainCamera.pixelWidth}x{mainCamera.pixelHeight}, {mainCamera.orthographicSize}");
-            //TODO debug
-            Debug.Log($"{mainCamera.ViewportToWorldPoint(new Vector2(0, 0))}x{mainCamera.ViewportToWorldPoint(new Vector2(1, 1))}\n" +
-                $"({mainCamera.rect.xMin}:{mainCamera.rect.yMin}) - ({mainCamera.rect.xMax}:{mainCamera.rect.yMax})");
         }
 
         /// <summary>
