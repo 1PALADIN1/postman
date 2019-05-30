@@ -175,10 +175,42 @@ namespace Core
             Camera mainCamera = Camera.main;
             Vector3 minVector = mainCamera.ViewportToWorldPoint(new Vector2(0, 0));
             Vector3 maxVector = mainCamera.ViewportToWorldPoint(new Vector2(1, 1));
-            float xMin = minVector.x;
-            float yMin = minVector.y;
-            float xMax = maxVector.x;
-            float yMax = maxVector.y;
+
+            //координаты углов прямоугольника камеры
+            Border cameraBorder = new Border(minVector.x, minVector.y, maxVector.x, maxVector.y);
+
+            //ищем координаты самых крайних объектов
+            Vector3 modelPosition = _allModels[0].transform.position;
+            Border modelBorder = new Border(modelPosition.x, modelPosition.y, modelPosition.x, modelPosition.y);
+            
+            for (int i = 1; i < _allModels.Length; i++)
+            {
+                modelPosition = _allModels[i].transform.position;
+
+                if (modelPosition.x > modelBorder.MaxX)
+                    modelBorder.MaxX = modelPosition.x;
+                if (modelPosition.x < modelBorder.MinX)
+                    modelBorder.MinX = modelPosition.x;
+                if (modelPosition.y > modelBorder.MaxY)
+                    modelBorder.MaxY = modelPosition.y;
+                if (modelPosition.y < modelBorder.MinY)
+                    modelBorder.MinY = modelPosition.y;
+            }
+
+            //TODO debug
+            Debug.Log($"Min: ({modelBorder.MinX}:{modelBorder.MinY}), max: ({modelBorder.MaxX}:{modelBorder.MaxY})");
+
+            //адаптируем камеру
+            if (modelBorder.MaxX >= cameraBorder.MaxX ||
+                modelBorder.MaxY >= cameraBorder.MaxY ||
+                modelBorder.MinX <= cameraBorder.MinX ||
+                modelBorder.MinY <= cameraBorder.MinY)
+            {
+                mainCamera.orthographicSize++;
+
+                //TODO debug
+                Debug.Log($"Camera is adaptated to size {mainCamera.orthographicSize}");
+            }
 
             //TODO debug
             Debug.Log($"{mainCamera.pixelWidth}x{mainCamera.pixelHeight}, {mainCamera.orthographicSize}");
