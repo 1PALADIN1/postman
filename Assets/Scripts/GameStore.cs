@@ -48,10 +48,14 @@ namespace Core
         //представления
         private LevelFinishView _levelFinishView;
         private BaseView _nextLevelButton;
+        private BaseView _pauseMenuView;
 
         private static GameStore _instance;
 
         private LevelChecker _levelChecker;
+
+        //находится ли уровень на паузе
+        private bool _isGamePaused = false;
 
         //TODO debug
         private float _fps = 0f;
@@ -98,6 +102,11 @@ namespace Core
                 return _levelChecker;
             }
         }
+
+        public bool IsGamePaused
+        {
+            get => _isGamePaused;
+        }
         #endregion
 
         private void Start()
@@ -143,9 +152,23 @@ namespace Core
             //представления
             foreach (var view in GameObject.FindObjectsOfType<BaseView>())
             {
-                if (view is LevelFinishView) _levelFinishView = (LevelFinishView)view;
-
                 view.Init();
+
+                if (view is IPanel)
+                {
+                    IPanel panel = view as IPanel;
+                    switch (view.UIMarker)
+                    {
+                        case UIMarker.PanelLevelFinish:
+                            _levelFinishView = (LevelFinishView)view;
+                            _levelFinishView.SetActive(false);
+                            break;
+                        case UIMarker.PanelLevelPause:
+                            _pauseMenuView = view;
+                            _pauseMenuView.SetActive(false);
+                            break;
+                    }
+                }
 
                 if (view is IButton)
                 {
@@ -156,12 +179,20 @@ namespace Core
                             button.SetAction(LoadNextLevel);
                             _nextLevelButton = view;
                             break;
+                        case UIMarker.ButtonRestartLevel:
+                            button.SetAction(RestartLevel);
+                            break;
+                        case UIMarker.ButtonContinueGame:
+                            button.SetAction(ContinueLevel);
+                            break;
+                        case UIMarker.ButtonToMenu:
+                            button.SetAction(LeaveLevel);
+                            break;
                     }
                 }
             }
 
             _nextLevelButton?.SetActive(false);
-            _levelFinishView?.SetActive(false);
 
             //прочее
             AdaptateCamera();
@@ -255,6 +286,10 @@ namespace Core
         {
             foreach (var controller in _onUpdateController)
                 controller.OnUpdate();
+
+            //TODO debug
+            if (Input.GetKeyDown(KeyCode.M))
+                PauseGame();
         }
 
         //TODO debug info
@@ -295,10 +330,11 @@ namespace Core
             }
         }
 
+        #region События для кнопок
         /// <summary>
         /// Перезагрузка уровня
         /// </summary>
-        public void RestartLevel()
+        private void RestartLevel()
         {
             SceneManager.LoadScene(SceneManager.GetActiveScene().name);
         }
@@ -306,7 +342,7 @@ namespace Core
         /// <summary>
         /// Переход на в меню с уровнями
         /// </summary>
-        public void LeaveLevel()
+        private void LeaveLevel()
         {
             SceneManager.LoadScene("MainMenuScene");
         }
@@ -314,7 +350,7 @@ namespace Core
         /// <summary>
         /// Загрузка следующего уровня
         /// </summary>
-        public void LoadNextLevel()
+        private void LoadNextLevel()
         {
             if (LevelChecker.HasNextLevel(_currentLevel))
             {
@@ -323,6 +359,25 @@ namespace Core
                 RestartLevel();
             }
         }
+
+        /// <summary>
+        /// Продолжаем уровень
+        /// </summary>
+        private void ContinueLevel()
+        {
+            _pauseMenuView?.SetActive(false);
+            _isGamePaused = false;
+        }
+
+        /// <summary>
+        /// Устанавливаем игру на паузу
+        /// </summary>
+        private void PauseGame()
+        {
+            _pauseMenuView?.SetActive(true);
+            _isGamePaused = true;
+        }
+        #endregion
 
         /// <summary>
         /// Получение нужного контроллера
