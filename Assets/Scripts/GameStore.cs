@@ -56,6 +56,8 @@ namespace Core
 
         //находится ли уровень на паузе
         private bool _isGamePaused = false;
+        //завершён ли уровень
+        private bool _isLevelFinished = false;
 
         //TODO debug
         private float _fps = 0f;
@@ -188,6 +190,9 @@ namespace Core
                         case UIMarker.ButtonToMenu:
                             button.SetAction(LeaveLevel);
                             break;
+                        case UIMarker.ButtonPause:
+                            button.SetAction(PauseGame);
+                            break;
                     }
                 }
             }
@@ -286,10 +291,6 @@ namespace Core
         {
             foreach (var controller in _onUpdateController)
                 controller.OnUpdate();
-
-            //TODO debug
-            if (Input.GetKeyDown(KeyCode.M))
-                PauseGame();
         }
 
         //TODO debug info
@@ -328,6 +329,8 @@ namespace Core
                 if (_nextLevelButton.IsActive)
                     _nextLevelButton.SetActive(false);
             }
+
+            _isLevelFinished = true;
         }
 
         #region События для кнопок
@@ -374,8 +377,15 @@ namespace Core
         /// </summary>
         private void PauseGame()
         {
-            _pauseMenuView?.SetActive(true);
-            _isGamePaused = true;
+            if (_isLevelFinished)
+                return;
+
+            if (_isGamePaused) ContinueLevel();
+            else
+            {
+                _pauseMenuView?.SetActive(true);
+                _isGamePaused = true;
+            }
         }
         #endregion
 

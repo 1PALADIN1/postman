@@ -15,6 +15,7 @@
         ButtonContinueGame = 108,
         ButtonRestartLevel = 109,
         ButtonToMenu = 110,
+        ButtonPause = 111,
         //панели
         PanelMainMenu = 500,
         PanelLevelList = 501,
