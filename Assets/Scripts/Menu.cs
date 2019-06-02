@@ -33,6 +33,7 @@ namespace Core
         private Pager<int> _pager;
         private LevelChecker _levelChecker;
         private AdaptiveView _adaptiveView;
+        private ProgressLoader _progressLoader;
 
         //панельки
         private List<IPanel> _panelList;
@@ -52,6 +53,9 @@ namespace Core
             _panelHeight = panelRect.height;
             _levelChecker = new LevelChecker();
             _adaptiveView = new AdaptiveView(_panelBrilliantWidth, _panelWidth);
+
+            //загрузка игрового прогресса
+            _progressLoader = new ProgressLoader();
 
             InitPager();
             LoadPage(_pager.CurrentPageNumber);

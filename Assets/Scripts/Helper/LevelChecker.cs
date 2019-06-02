@@ -78,5 +78,15 @@ namespace Core.Helper
                 return false;
             return true;
         }
+
+        /// <summary>
+        /// Существует ли уровень с указанным номером
+        /// </summary>
+        /// <param name="levelNum">Номер уровня</param>
+        /// <returns>Возвращает true, если уровень с номером существует, иначе - false</returns>
+        public bool HasLevel(int levelNum)
+        {
+            return _levelsNum.Contains(levelNum);
+        }
     }
 }
