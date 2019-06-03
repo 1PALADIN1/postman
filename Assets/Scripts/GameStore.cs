@@ -53,6 +53,7 @@ namespace Core
         private static GameStore _instance;
 
         private LevelChecker _levelChecker;
+        private ProgressLoader _progressLoader;
 
         //находится ли уровень на паузе
         private bool _isGamePaused = false;
@@ -123,7 +124,11 @@ namespace Core
             _msController = new MSController();
             _msController.SetPrefabs(_boxPrefab, _wallPrefab, _starPrefab, _finishPointPrefab);
             if (_levelMode == LevelMode.Game) _msController.LoadLevel(_currentLevel, false);
-            
+
+            //загрузка прогресса
+            _progressLoader = new ProgressLoader();
+            _progressLoader.LoadGameProgress();
+
             FillModelArrays();
 
             //контроллеры
@@ -331,6 +336,9 @@ namespace Core
             }
 
             _isLevelFinished = true;
+
+            //сохраняем прогресс
+            _progressLoader.SaveFinishLevel(_currentLevel, _collectController.CollectedStars);
         }
 
         #region События для кнопок

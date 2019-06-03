@@ -56,6 +56,7 @@ namespace Core
 
             //загрузка игрового прогресса
             _progressLoader = new ProgressLoader();
+            _progressLoader.LoadGameProgress();
 
             InitPager();
             LoadPage(_pager.CurrentPageNumber);
@@ -258,7 +259,15 @@ namespace Core
                         buttonView.Level = pageElements[levelCount];
                         buttonView.SetAction(StartLevel);
                         baseButtons.Add(buttonView);
+
+                        //делаем доступными кнопки в зависимости от прогресса
+                        if (pageElements[levelCount] <= _progressLoader.CanStartLevel)
+                            buttonView.SetEnabled(true);
+                        else
+                            buttonView.SetEnabled(false);
+
                         levelCount++;
+
                     }
                 }
 

@@ -47,11 +47,16 @@ namespace Core.View
 
         public void SetAction(UnityAction action)
         {
-            _levelButton.onClick.AddListener(() =>
+            action = () =>
             {
-                PlayerPrefs.SetInt("CurrentLevel", _levelNum);
-                SceneManager.LoadScene("LevelScene");
-            });
+                if (IsEnabled)
+                {
+                    PlayerPrefs.SetInt("CurrentLevel", _levelNum);
+                    SceneManager.LoadScene("LevelScene");
+                }
+            };
+
+            _levelButton.onClick.AddListener(action);
         }
     }
 }
