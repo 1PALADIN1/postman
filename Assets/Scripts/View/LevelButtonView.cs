@@ -7,8 +7,22 @@ namespace Core.View
 {
     public class LevelButtonView : BaseView, IButton
     {
+        //UI
+        [Header("Изображения")]
+        [SerializeField]
+        private Sprite _noStarsSprite;
+        [SerializeField]
+        private Sprite _oneStarSprite;
+        [SerializeField]
+        private Sprite _twoStarsSprite;
+        [SerializeField]
+        private Sprite _threeStarsSprite;
+        [SerializeField]
+        private Sprite _disableSprite;
+
         private Button _levelButton;
         private Text _levelButtonText;
+        private Image _levelButtonImage;
         private RectTransform _levelButtonRect;
         private int _levelNum = 1;
 
@@ -33,6 +47,11 @@ namespace Core.View
             _levelButton = gameObject.GetComponent<Button>();
             _levelButtonText = _levelButton.GetComponentInChildren<Text>(true);
             _levelButtonRect = _levelButton.GetComponent<RectTransform>();
+            _levelButtonImage = _levelButton.GetComponent<Image>();
+
+            if (IsEnabled) _levelButtonImage.sprite = _noStarsSprite;
+            else
+                _levelButtonImage.sprite = _disableSprite;
         }
 
         /// <summary>
@@ -57,6 +76,12 @@ namespace Core.View
             };
 
             _levelButton.onClick.AddListener(action);
+        }
+
+        public override void SetEnabled(bool isEnabled)
+        {
+            base.SetEnabled(isEnabled);
+            _levelButtonImage.sprite = _disableSprite;
         }
     }
 }
