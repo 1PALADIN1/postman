@@ -254,20 +254,22 @@ namespace Core
 
                     if (buttonView != null)
                     {
+                        int levelNum = pageElements[levelCount];
                         buttonView.Init();
                         buttonView.Text = pageElements[levelCount].ToString();
-                        buttonView.Level = pageElements[levelCount];
+                        buttonView.Level = levelNum;
                         buttonView.SetAction(StartLevel);
                         baseButtons.Add(buttonView);
 
                         //делаем доступными кнопки в зависимости от прогресса
-                        if (pageElements[levelCount] <= _progressLoader.CanStartLevel)
+                        if (levelNum <= _progressLoader.CanStartLevel)
                             buttonView.SetEnabled(true);
                         else
                             buttonView.SetEnabled(false);
 
-                        levelCount++;
+                        buttonView.SetStarSprite(_progressLoader.StarsInLevel(levelNum));
 
+                        levelCount++;
                     }
                 }
 

@@ -48,10 +48,6 @@ namespace Core.View
             _levelButtonText = _levelButton.GetComponentInChildren<Text>(true);
             _levelButtonRect = _levelButton.GetComponent<RectTransform>();
             _levelButtonImage = _levelButton.GetComponent<Image>();
-
-            if (IsEnabled) _levelButtonImage.sprite = _noStarsSprite;
-            else
-                _levelButtonImage.sprite = _disableSprite;
         }
 
         /// <summary>
@@ -77,11 +73,33 @@ namespace Core.View
 
             _levelButton.onClick.AddListener(action);
         }
-
-        public override void SetEnabled(bool isEnabled)
+        
+        /// <summary>
+        /// Установка спрайта для кнопки
+        /// </summary>
+        /// <param name="starsNum">Количество звёзд</param>
+        public void SetStarSprite(int starsNum)
         {
-            base.SetEnabled(isEnabled);
-            _levelButtonImage.sprite = _disableSprite;
+            if (IsEnabled)
+            {
+                switch (starsNum)
+                {
+                    case 1:
+                        _levelButtonImage.sprite = _oneStarSprite;
+                        break;
+                    case 2:
+                        _levelButtonImage.sprite = _twoStarsSprite;
+                        break;
+                    case 3:
+                        _levelButtonImage.sprite = _threeStarsSprite;
+                        break;
+                    default:
+                        _levelButtonImage.sprite = _noStarsSprite;
+                        break;
+                }
+            }
+            else
+                _levelButtonImage.sprite = _disableSprite;
         }
     }
 }
