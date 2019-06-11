@@ -121,3 +121,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _serializeType: 4
   _color: 0
+  _redSprite: {fileID: 21300000, guid: e9e1c2cd278450445a6b8d7199b9c17a, type: 3}
+  _blueSprite: {fileID: 21300000, guid: a19e9ca648540934f89fb0cf798f0e20, type: 3}
+  _greenSprite: {fileID: 21300000, guid: a19e9ca648540934f89fb0cf798f0e20, type: 3}

@@ -7,37 +7,47 @@ namespace Core.Model
     {
         [SerializeField]
         private BoxColor _color;
+        [Header("Спрайты")]
+        [SerializeField]
+        private Sprite _redSprite;
+        [SerializeField]
+        private Sprite _blueSprite;
+        [SerializeField]
+        private Sprite _greenSprite;
 
         public delegate void BoxOnFinishMethod(MailBox box, FinishPoint finishPoint);
 
         private BoxOnFinishMethod FinishMethod;
+        private SpriteRenderer _spriteRenderer;
 
         public BoxColor Color
         {
             get => _color;
             set
             {
-                var renderColor = UnityEngine.Color.white;
+                if (_spriteRenderer == null)
+                    _spriteRenderer = gameObject.GetComponent<SpriteRenderer>();
                 switch (value)
                 {
                     case BoxColor.Green:
-                        renderColor = UnityEngine.Color.green;
+                        _spriteRenderer.sprite = _greenSprite;
                         break;
                     case BoxColor.Red:
-                        renderColor = UnityEngine.Color.red;
+                        _spriteRenderer.sprite = _redSprite;
                         break;
                     case BoxColor.Blue:
-                        renderColor = UnityEngine.Color.blue;
+                        _spriteRenderer.sprite = _blueSprite;
                         break;
                 }
-
-                gameObject.GetComponent<SpriteRenderer>().color = renderColor;
+                
                 _color = value;
             }
         }
 
         private void Start()
         {
+            if (_spriteRenderer == null)
+                _spriteRenderer = gameObject.GetComponent<SpriteRenderer>();
             Color = _color;
         }
 

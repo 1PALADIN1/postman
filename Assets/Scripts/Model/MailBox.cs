@@ -11,6 +11,13 @@ namespace Core.Model
         private float _moveSpeed = 10;
         [SerializeField]
         private BoxState _currentState = BoxState.Idle;
+        [Header("Спрайты коробочек")]
+        [SerializeField]
+        private Sprite _redBoxSprite;
+        [SerializeField]
+        private Sprite _blueBoxSprite;
+        [SerializeField]
+        private Sprite _greenBoxSprite;
 
         public delegate void OnFinishMethod();
 
@@ -18,27 +25,26 @@ namespace Core.Model
         private bool _isSelected = false;
         private Rigidbody2D _rigidbody2d;
         private OnFinishMethod FinishMethod;
+        private SpriteRenderer _spriteRenderer;
 
         public BoxColor Color
         {
             get => _color;
             set
             {
-                var renderColor = UnityEngine.Color.white;
                 switch (value)
                 {
                     case BoxColor.Green:
-                        renderColor = UnityEngine.Color.green;
+                        _spriteRenderer.sprite = _greenBoxSprite;
                         break;
                     case BoxColor.Red:
-                        renderColor = UnityEngine.Color.red;
+                        _spriteRenderer.sprite = _redBoxSprite;
                         break;
                     case BoxColor.Blue:
-                        renderColor = UnityEngine.Color.blue;
+                        _spriteRenderer.sprite = _blueBoxSprite;
                         break;
                 }
 
-                gameObject.GetComponent<SpriteRenderer>().color = renderColor;
                 _color = value;
             }
         }
@@ -46,6 +52,7 @@ namespace Core.Model
         private void Awake()
         {
             _rigidbody2d = gameObject.GetComponent<Rigidbody2D>();
+            _spriteRenderer = gameObject.GetComponent<SpriteRenderer>();
             Color = _color;
         }
 
