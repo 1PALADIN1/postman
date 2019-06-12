@@ -22,6 +22,7 @@ namespace Core.Controller
         private GameObject _wallPrefab;
         private GameObject _starPrefab;
         private GameObject _finishPointPrefab;
+        private GameObject _floorPrefab;
 
         public override void Init()
         {
@@ -35,6 +36,7 @@ namespace Core.Controller
             _wallPrefab = prefabs[1];
             _starPrefab = prefabs[2];
             _finishPointPrefab = prefabs[3];
+            _floorPrefab = prefabs[4];
         }
         
         //TODO debug DEV function
@@ -103,6 +105,7 @@ namespace Core.Controller
             GameObject starsDir = GameObject.Find("Stars");
             GameObject boxesDir = GameObject.Find("Boxes");
             GameObject fpsDir = GameObject.Find("Finish");
+            GameObject floorDir = GameObject.Find("Floor");
 
             Vector3 tmpVector3 = new Vector3();
 
@@ -131,6 +134,9 @@ namespace Core.Controller
                     case EntityType.FinishPoint:
                         var finishInst = GameObject.Instantiate(_finishPointPrefab, tmpVector3, Quaternion.identity, fpsDir.transform);
                         finishInst.GetComponent<FinishPoint>().Color = (BoxColor)int.Parse(data[2].Trim());
+                        break;
+                    case EntityType.Floor:
+                        GameObject.Instantiate(_floorPrefab, tmpVector3, Quaternion.identity, floorDir.transform);
                         break;
                 }
             }

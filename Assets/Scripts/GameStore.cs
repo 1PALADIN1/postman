@@ -21,6 +21,8 @@ namespace Core
         private GameObject _starPrefab;
         [SerializeField]
         private GameObject _finishPointPrefab;
+        [SerializeField]
+        private GameObject _floorPrefab;
         [Header("Настройки уровня")]
         [SerializeField]
         private LevelMode _levelMode = LevelMode.Game;
@@ -122,7 +124,7 @@ namespace Core
 
             //загрузчик уровней
             _msController = new MSController();
-            _msController.SetPrefabs(_boxPrefab, _wallPrefab, _starPrefab, _finishPointPrefab);
+            _msController.SetPrefabs(_boxPrefab, _wallPrefab, _starPrefab, _finishPointPrefab, _floorPrefab);
             if (_levelMode == LevelMode.Game) _msController.LoadLevel(_currentLevel, false);
 
             //загрузка прогресса
