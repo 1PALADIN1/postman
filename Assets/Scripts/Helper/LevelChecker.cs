@@ -22,7 +22,8 @@ namespace Core.Helper
         /// </summary>
         public static string LevelsPath
         {
-            get => Application.dataPath + "/StreamingAssets/Levels/";
+            get => Application.platform == RuntimePlatform.Android ? Application.dataPath + "/StreamingAssets/" //"jar:file://" + Application.dataPath + "!/assets/"
+                : Application.dataPath + "/StreamingAssets/Levels/";
         }
 
         /// <summary>

@@ -69,5 +69,25 @@ namespace Core.Controller
                     _selectObjects[i].Unselect();
             }
         }
+
+        /// <summary>
+        /// Выбирает объект, если он есть в списке
+        /// </summary>
+        /// <param name="selectObject">Объект, который нужно выбрать</param>
+        /// <returns>Возваращает true, если объект успешно выбран, иначе - false</returns>
+        public bool Select(ISelectable selectObject)
+        {
+            for (int i = 0; i < _selectObjects.Length; i++)
+            {
+                if (_selectObjects[i] == selectObject)
+                {
+                    _currentSelected = i;
+                    SelectCurrent();
+                    return true;
+                }
+            }
+
+            return false;
+        }
     }
 }

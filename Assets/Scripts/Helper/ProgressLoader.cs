@@ -15,7 +15,8 @@ namespace Core.Helper
         private LevelChecker _levelChecker;
 
         //файл сохранения
-        public string SaveFileFullPath => $"{Application.dataPath}/StreamingAssets/progress.sv";
+        public string SaveFileFullPath => Application.platform == RuntimePlatform.Android ? $"{Application.persistentDataPath}/progress.sv" : //"jar:file://" + Application.dataPath + "!/assets/progress.sv" :
+            $"{Application.dataPath}/StreamingAssets/progress.sv";
 
         public int CanStartLevel => _progress.Count + 1;
         
