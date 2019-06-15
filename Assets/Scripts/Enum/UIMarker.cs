@@ -16,6 +16,8 @@
         ButtonRestartLevel = 109,
         ButtonToMenu = 110,
         ButtonPause = 111,
+        //изображения
+        ImageFinishStars = 200,
         //панели
         PanelMainMenu = 500,
         PanelLevelList = 501,

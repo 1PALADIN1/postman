@@ -44,13 +44,13 @@ namespace Core.Controller
         {
             if (!_gameStore.IsGamePaused)
             {
-                MobileInput();
+                //MobileInput();
 
-                //if (Application.platform == RuntimePlatform.Android
-                //    || Application.platform == RuntimePlatform.IPhonePlayer)
-                //    MobileInput();
-                //else
-                //    StandaloneInput();
+                if (Application.platform == RuntimePlatform.Android
+                    || Application.platform == RuntimePlatform.IPhonePlayer)
+                    MobileInput();
+                else
+                    StandaloneInput();
             }
         }
 

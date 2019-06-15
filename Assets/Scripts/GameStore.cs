@@ -3,7 +3,6 @@ using Core.Enum;
 using Core.Helper;
 using Core.Model;
 using Core.View;
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -51,6 +50,7 @@ namespace Core
         private LevelFinishView _levelFinishView;
         private BaseView _nextLevelButton;
         private BaseView _pauseMenuView;
+        private FinishStarsImageView _finishStarsImage;
 
         private static GameStore _instance;
 
@@ -202,6 +202,9 @@ namespace Core
                             break;
                     }
                 }
+
+                if (view is FinishStarsImageView)
+                    _finishStarsImage = view as FinishStarsImageView;
             }
 
             _nextLevelButton?.SetActive(false);
@@ -321,6 +324,9 @@ namespace Core
         {
             //TODO debug
             Debug.Log($"Уровень завершён, собрано звёзд {_collectController.CollectedStars}/{_collectController.MaxStars}");
+
+            //отрисовываем звёзды
+            _finishStarsImage.SetStarNumber(_collectController.CollectedStars);
 
             _levelFinishView?.SetActive(true);
             _levelFinishView?.SetStarsFinished(_collectController.MaxStars, _collectController.CollectedStars);

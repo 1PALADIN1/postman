@@ -76,8 +76,6 @@ namespace Core.View
         {
             _totalStars = totalStars;
             _collectedStars = collectedStars;
-
-            _finishedText.text = $"Поздравляем! Уровень завершен!\nВы собрали {collectedStars} из {totalStars} звёзд.";
         }
     }
 }
