@@ -47,6 +47,13 @@ namespace Core.Controller
             if (!Directory.Exists(_saveFolder))
                 Directory.CreateDirectory(_saveFolder);
 
+            //подвязываем модели
+            if (_gameStore.LevelMode == LevelMode.Editor)
+            {
+                _gameStore.FillModelArrays();
+                _gameStore.InitAllControllers();
+            }
+
             FileStream fileStream;
 
             if (!File.Exists(_saveFolder + _fileName))

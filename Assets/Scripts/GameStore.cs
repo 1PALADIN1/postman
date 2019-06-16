@@ -119,6 +119,8 @@ namespace Core
         {
             get => _isGamePaused;
         }
+
+        public LevelMode LevelMode => _levelMode;
         #endregion
 
         private void Start()

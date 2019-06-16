@@ -74,6 +74,8 @@ namespace Core.Helper
         /// <param name="stars">Количество собранных звёзд</param>
         public void SaveFinishLevel(int level, int stars)
         {
+            //TODO поправить ошибку с перезатираением лучшего прогресса
+
             if (_levelChecker.HasLevel(level))
             {
                 if (_progress.ContainsKey(level)) _progress[level] = new ProgressInfo(stars, true);
