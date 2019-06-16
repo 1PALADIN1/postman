@@ -70,8 +70,9 @@ namespace Core.Controller
                     case TouchPhase.Ended:
                         _endPos = Camera.main.ScreenToWorldPoint(Input.touches[0].position);
 
-                        var moveDirection = MovedDirection();
+                        var moveDirection = MovedDirection(_startPos, _endPos);
                         var box = TouchBox(_startPos, _endPos, moveDirection);
+                        
                         if (box != null)
                         {
                             if (_selectController.Select(box))
@@ -111,27 +112,30 @@ namespace Core.Controller
         /// Определяет в каком направлении был свайп
         /// </summary>
         /// <returns>Возвращает направление</returns>
-        private TouchDirection MovedDirection()
+        private TouchDirection MovedDirection(Vector3 start, Vector3 end)
         {
             TouchDirection result = TouchDirection.None;
 
-            //delta position
-            Vector2 delta = Input.touches[0].deltaPosition;
-            if (Mathf.Abs(delta.x) > Mathf.Abs(delta.y))
+            float startX = start.x;
+            float startY = start.y;
+            float endX = end.x;
+            float endY = end.y;
+
+            if (Mathf.Abs(startX - endX) > Mathf.Abs(startY - endY))
             {
                 //смещение по X
-                if (delta.x > 0)
-                    return TouchDirection.DirectionRight;
-                if (delta.x < 0)
+                if (startX > endX)
                     return TouchDirection.DirectionLeft;
+                if (startX < endX)
+                    return TouchDirection.DirectionRight;
             }
             else
             {
                 //смещение по Y
-                if (delta.y > 0)
-                    return TouchDirection.DirectionUp;
-                if (delta.y < 0)
+                if (startY > endY)
                     return TouchDirection.DirectionDown;
+                if (startY < endY)
+                    return TouchDirection.DirectionUp;
             }
 
             return result;
@@ -249,7 +253,7 @@ namespace Core.Controller
 
             //загрузка уровня
             if (Input.GetKeyDown(_loadLevel))
-                _msController.LoadLevel(_gameStore.CurrentLevel);
+                _msController.LoadLevel(_gameStore.CurrentLevel, true);
             //сохранение уровня
             if (Input.GetKeyDown(_saveLevel))
                 _msController.SaveLevel(_gameStore.CurrentLevel);

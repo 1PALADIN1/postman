@@ -6,6 +6,7 @@ namespace Core.Helper
 {
     public class LevelChecker
     {
+        private readonly int _totalLevels = 12;
         private List<string> _levels;
         private List<int> _levelsNum;
 
@@ -22,7 +23,7 @@ namespace Core.Helper
         /// </summary>
         public static string LevelsPath
         {
-            get => Application.platform == RuntimePlatform.Android ? Application.dataPath + "/StreamingAssets/" //"jar:file://" + Application.dataPath + "!/assets/"
+            get => Application.platform == RuntimePlatform.Android ? "Levels/"
                 : Application.dataPath + "/StreamingAssets/Levels/";
         }
 
@@ -54,15 +55,39 @@ namespace Core.Helper
         /// </summary>
         public void Refresh()
         {
-            int levelNum = 0;
-
-            foreach (var level in Directory.GetFiles(LevelsPath))
+            if (Application.platform == RuntimePlatform.Android)
             {
-                if (level.EndsWith(".lvl"))
+                int levelNum = 0;
+
+                BetterStreamingAssets.Initialize();
+                foreach (var level in BetterStreamingAssets.GetFiles(LevelsPath))
                 {
-                    _levels.Add(level.Substring(level.IndexOf("level")));
-                    levelNum++;
-                    _levelsNum.Add(levelNum);
+                    if (level.EndsWith(".lvl"))
+                    {
+                        _levels.Add(level.Substring(level.IndexOf("level")));
+                        levelNum++;
+                        _levelsNum.Add(levelNum);
+                    }
+                }
+
+                //for (int i = 0; i < _totalLevels; i++)
+                //{
+                //    _levels.Add($"level{i + 1}.lvl");
+                //    _levelsNum.Add(i + 1);
+                //}
+            }
+            else
+            {
+                int levelNum = 0;
+
+                foreach (var level in Directory.GetFiles(LevelsPath))
+                {
+                    if (level.EndsWith(".lvl"))
+                    {
+                        _levels.Add(level.Substring(level.IndexOf("level")));
+                        levelNum++;
+                        _levelsNum.Add(levelNum);
+                    }
                 }
             }
         }

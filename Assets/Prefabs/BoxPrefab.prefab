@@ -143,7 +143,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _serializeType: 1
   _color: 1
-  _moveSpeed: 20
+  _moveSpeed: 30
   _currentState: 0
   _redBoxSprite: {fileID: 21300000, guid: 665589a8be2d98f4fb3f79fad7d42044, type: 3}
   _blueBoxSprite: {fileID: 21300000, guid: d99ce24ac4571554eb42645a2adce906, type: 3}
