@@ -18,6 +18,7 @@
         ButtonPause = 111,
         //изображения
         ImageFinishStars = 200,
+        ImageCurrentStars = 201,
         //панели
         PanelMainMenu = 500,
         PanelLevelList = 501,

@@ -51,6 +51,7 @@ namespace Core
         private BaseView _nextLevelButton;
         private BaseView _pauseMenuView;
         private FinishStarsImageView _finishStarsImage;
+        private LevelCurrentStarsImageView _currentStarsImageView;
 
         private static GameStore _instance;
 
@@ -66,13 +67,6 @@ namespace Core
         private float _fps = 0f;
         //TODO debug
         private float _lastTime = 0f;
-        //TODO debug
-        private string _error = string.Empty;
-
-        public void SetError(string error)
-        {
-            _error = error;
-        }
 
         #region Свойства
         public static GameStore Store
@@ -100,6 +94,9 @@ namespace Core
         {
             get => _allModels;
         }
+
+        //представления
+        public LevelCurrentStarsImageView CurrentStarsImageView => _currentStarsImageView;
 
         public int CurrentLevel
         {
@@ -134,14 +131,7 @@ namespace Core
             //загрузчик уровней
             _msController = new MSController();
             _msController.SetPrefabs(_boxPrefab, _wallPrefab, _starPrefab, _finishPointPrefab, _floorPrefab);
-            try
-            {
-                if (_levelMode == LevelMode.Game) _msController.LoadLevel(_currentLevel, false);
-            }
-            catch (System.Exception e)
-            {
-                _error = e.ToString();
-            }
+            if (_levelMode == LevelMode.Game) _msController.LoadLevel(_currentLevel, false);
 
             //загрузка прогресса
             _progressLoader = new ProgressLoader();
@@ -221,6 +211,9 @@ namespace Core
 
                 if (view is FinishStarsImageView)
                     _finishStarsImage = view as FinishStarsImageView;
+
+                if (view is LevelCurrentStarsImageView)
+                    _currentStarsImageView = view as LevelCurrentStarsImageView;
             }
 
             _nextLevelButton?.SetActive(false);
@@ -331,7 +324,6 @@ namespace Core
             }
 
             GUI.Label(new Rect(10, 10, 100, 100), $"{_fps:0.0}");
-            GUI.Label(new Rect(10, 40, 800, 600), $"Ошибка: {_error}");
         }
 
         /// <summary>
