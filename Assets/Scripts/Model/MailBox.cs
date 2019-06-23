@@ -142,6 +142,11 @@ namespace Core.Model
             return _currentState != BoxState.Finish;
         }
 
+        public bool IsBusy()
+        {
+            return _currentState == BoxState.Move;
+        }
+
         public void SetFinished(OnFinishMethod finishMethod)
         {
             _currentAction = GameAction.Finished;

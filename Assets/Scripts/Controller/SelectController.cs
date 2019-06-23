@@ -27,8 +27,8 @@ namespace Core.Controller
         /// <returns>Возвращает false, если не может выбрать элемент</returns>
         public bool SelectNext()
         {
-            //TODO проверка на то, что текущий ящик не перемещается
-            //...
+            if (SelectedObject.IsBusy())
+                return false;
 
             int tmpSelect = _currentSelected;
 
