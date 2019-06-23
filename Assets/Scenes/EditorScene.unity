@@ -319,7 +319,7 @@ MonoBehaviour:
   _floorPrefab: {fileID: 8399274852895106346, guid: 81096b605055dff458b7ec98e63755e0,
     type: 3}
   _levelMode: 1
-  _currentLevel: 9
+  _currentLevel: 12
 --- !u!1 &299932123
 GameObject:
   m_ObjectHideFlags: 0
