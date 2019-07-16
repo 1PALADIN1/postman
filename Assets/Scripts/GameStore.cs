@@ -3,7 +3,6 @@ using Core.Enum;
 using Core.Helper;
 using Core.Model;
 using Core.View;
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -21,6 +20,8 @@ namespace Core
         private GameObject _starPrefab;
         [SerializeField]
         private GameObject _finishPointPrefab;
+        [SerializeField]
+        private GameObject _floorPrefab;
         [Header("Настройки уровня")]
         [SerializeField]
         private LevelMode _levelMode = LevelMode.Game;
@@ -47,10 +48,20 @@ namespace Core
 
         //представления
         private LevelFinishView _levelFinishView;
+        private BaseView _nextLevelButton;
+        private BaseView _pauseMenuView;
+        private FinishStarsImageView _finishStarsImage;
+        private LevelCurrentStarsImageView _currentStarsImageView;
 
         private static GameStore _instance;
 
         private LevelChecker _levelChecker;
+        private ProgressLoader _progressLoader;
+
+        //находится ли уровень на паузе
+        private bool _isGamePaused = false;
+        //завершён ли уровень
+        private bool _isLevelFinished = false;
 
         //TODO debug
         private float _fps = 0f;
@@ -84,6 +95,9 @@ namespace Core
             get => _allModels;
         }
 
+        //представления
+        public LevelCurrentStarsImageView CurrentStarsImageView => _currentStarsImageView;
+
         public int CurrentLevel
         {
             get => _currentLevel;
@@ -97,6 +111,13 @@ namespace Core
                 return _levelChecker;
             }
         }
+
+        public bool IsGamePaused
+        {
+            get => _isGamePaused;
+        }
+
+        public LevelMode LevelMode => _levelMode;
         #endregion
 
         private void Start()
@@ -109,8 +130,12 @@ namespace Core
 
             //загрузчик уровней
             _msController = new MSController();
-            _msController.SetPrefabs(_boxPrefab, _wallPrefab, _starPrefab, _finishPointPrefab);
+            _msController.SetPrefabs(_boxPrefab, _wallPrefab, _starPrefab, _finishPointPrefab, _floorPrefab);
             if (_levelMode == LevelMode.Game) _msController.LoadLevel(_currentLevel, false);
+
+            //загрузка прогресса
+            _progressLoader = new ProgressLoader();
+            _progressLoader.LoadGameProgress();
             
             FillModelArrays();
 
@@ -142,12 +167,107 @@ namespace Core
             //представления
             foreach (var view in GameObject.FindObjectsOfType<BaseView>())
             {
-                if (view is LevelFinishView) _levelFinishView = (LevelFinishView)view;
-
                 view.Init();
+
+                if (view is IPanel)
+                {
+                    IPanel panel = view as IPanel;
+                    switch (view.UIMarker)
+                    {
+                        case UIMarker.PanelLevelFinish:
+                            _levelFinishView = (LevelFinishView)view;
+                            _levelFinishView.SetActive(false);
+                            break;
+                        case UIMarker.PanelLevelPause:
+                            _pauseMenuView = view;
+                            _pauseMenuView.SetActive(false);
+                            break;
+                    }
+                }
+
+                if (view is IButton)
+                {
+                    IButton button = view as IButton;
+                    switch (view.UIMarker)
+                    {
+                        case UIMarker.ButtonNextLevel:
+                            button.SetAction(LoadNextLevel);
+                            _nextLevelButton = view;
+                            break;
+                        case UIMarker.ButtonRestartLevel:
+                            button.SetAction(RestartLevel);
+                            break;
+                        case UIMarker.ButtonContinueGame:
+                            button.SetAction(ContinueLevel);
+                            break;
+                        case UIMarker.ButtonToMenu:
+                            button.SetAction(LeaveLevel);
+                            break;
+                        case UIMarker.ButtonPause:
+                            button.SetAction(PauseGame);
+                            break;
+                    }
+                }
+
+                if (view is FinishStarsImageView)
+                    _finishStarsImage = view as FinishStarsImageView;
+
+                if (view is LevelCurrentStarsImageView)
+                    _currentStarsImageView = view as LevelCurrentStarsImageView;
             }
 
-            _levelFinishView?.SetActive(false);
+            _nextLevelButton?.SetActive(false);
+
+            //прочее
+            AdaptateCamera();
+        }
+
+        /// <summary>
+        /// Адаптация размера камеры к уровню
+        /// </summary>
+        private void AdaptateCamera()
+        {
+            //ищем координаты самых крайних объектов
+            Vector3 modelPosition = _allModels[0].transform.position;
+            Border modelBorder = new Border(modelPosition.x, modelPosition.y, modelPosition.x, modelPosition.y);
+
+            for (int i = 1; i < _allModels.Length; i++)
+            {
+                modelPosition = _allModels[i].transform.position;
+
+                if (modelPosition.x > modelBorder.MaxX)
+                    modelBorder.MaxX = modelPosition.x;
+                if (modelPosition.x < modelBorder.MinX)
+                    modelBorder.MinX = modelPosition.x;
+                if (modelPosition.y > modelBorder.MaxY)
+                    modelBorder.MaxY = modelPosition.y;
+                if (modelPosition.y < modelBorder.MinY)
+                    modelBorder.MinY = modelPosition.y;
+            }
+
+            Camera mainCamera = Camera.main;
+            bool isAdapted = false;
+
+            while (!isAdapted)
+            {
+                Vector3 minVector = mainCamera.ViewportToWorldPoint(new Vector2(0, 0));
+                Vector3 maxVector = mainCamera.ViewportToWorldPoint(new Vector2(1, 1));
+                //координаты углов прямоугольника камеры
+                Border cameraBorder = new Border(minVector.x, minVector.y, maxVector.x, maxVector.y);
+
+                //адаптируем камеру
+                if (modelBorder.MaxX >= cameraBorder.MaxX ||
+                    modelBorder.MaxY >= cameraBorder.MaxY ||
+                    modelBorder.MinX <= cameraBorder.MinX ||
+                    modelBorder.MinY <= cameraBorder.MinY)
+                {
+                    mainCamera.orthographicSize++;
+                }
+                else
+                {
+                    isAdapted = true;
+                }
+            }
         }
 
         /// <summary>
@@ -214,14 +334,35 @@ namespace Core
             //TODO debug
             Debug.Log($"Уровень завершён, собрано звёзд {_collectController.CollectedStars}/{_collectController.MaxStars}");
 
+            //отрисовываем звёзды
+            _finishStarsImage.SetStarNumber(_collectController.CollectedStars);
+
             _levelFinishView?.SetActive(true);
             _levelFinishView?.SetStarsFinished(_collectController.MaxStars, _collectController.CollectedStars);
+
+            //кнопка Дальше
+            if (LevelChecker.HasNextLevel(_currentLevel))
+            {
+                if (!_nextLevelButton.IsActive)
+                    _nextLevelButton.SetActive(true);
+            }
+            else
+            {
+                if (_nextLevelButton.IsActive)
+                    _nextLevelButton.SetActive(false);
+            }
+
+            _isLevelFinished = true;
+
+            //сохраняем прогресс
+            _progressLoader.SaveFinishLevel(_currentLevel, _collectController.CollectedStars);
         }
 
+        #region События для кнопок
         /// <summary>
         /// Перезагрузка уровня
         /// </summary>
-        public void RestartLevel()
+        private void RestartLevel()
         {
             SceneManager.LoadScene(SceneManager.GetActiveScene().name);
         }
@@ -229,7 +370,7 @@ namespace Core
         /// <summary>
         /// Переход на в меню с уровнями
         /// </summary>
-        public void LeaveLevel()
+        private void LeaveLevel()
         {
             SceneManager.LoadScene("MainMenuScene");
         }
@@ -237,7 +378,7 @@ namespace Core
         /// <summary>
         /// Загрузка следующего уровня
         /// </summary>
-        public void LoadNextLevel()
+        private void LoadNextLevel()
         {
             if (LevelChecker.HasNextLevel(_currentLevel))
             {
@@ -246,6 +387,32 @@ namespace Core
                 RestartLevel();
             }
         }
+
+        /// <summary>
+        /// Продолжаем уровень
+        /// </summary>
+        private void ContinueLevel()
+        {
+            _pauseMenuView?.SetActive(false);
+            _isGamePaused = false;
+        }
+
+        /// <summary>
+        /// Устанавливаем игру на паузу
+        /// </summary>
+        private void PauseGame()
+        {
+            if (_isLevelFinished)
+                return;
+
+            if (_isGamePaused) ContinueLevel();
+            else
+            {
+                _pauseMenuView?.SetActive(true);
+                _isGamePaused = true;
+            }
+        }
+        #endregion
 
         /// <summary>
         /// Получение нужного контроллера

@@ -30,6 +30,22 @@ namespace Core.Helper
             get => _currentPage;
         }
 
+        /// <summary>
+        /// Есть ли следующая страница
+        /// </summary>
+        public bool HasNextPage
+        {
+            get => _currentPage < TotalPages - 1;
+        }
+
+        /// <summary>
+        /// Есть ли предыдущая страница
+        /// </summary>
+        public bool HasPrevPage
+        {
+            get => _currentPage > 0;
+        }
+
         public Pager(T[] elements, int pageSize)
         {
             _elements = elements;

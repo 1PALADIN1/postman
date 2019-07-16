@@ -22,6 +22,7 @@ namespace Core.Controller
         private GameObject _wallPrefab;
         private GameObject _starPrefab;
         private GameObject _finishPointPrefab;
+        private GameObject _floorPrefab;
 
         public override void Init()
         {
@@ -35,15 +36,23 @@ namespace Core.Controller
             _wallPrefab = prefabs[1];
             _starPrefab = prefabs[2];
             _finishPointPrefab = prefabs[3];
+            _floorPrefab = prefabs[4];
         }
         
         //TODO debug DEV function
         public void SaveLevel(int levelNum)
         {
-            _fileName += levelNum + _levelFileExt;
+            _fileName = LevelChecker.FilePrefix + levelNum + _levelFileExt;
 
             if (!Directory.Exists(_saveFolder))
                 Directory.CreateDirectory(_saveFolder);
+
+            //подвязываем модели
+            if (_gameStore.LevelMode == LevelMode.Editor)
+            {
+                _gameStore.FillModelArrays();
+                _gameStore.InitAllControllers();
+            }
 
             FileStream fileStream;
 
@@ -81,46 +90,68 @@ namespace Core.Controller
         /// </summary>
         /// <param name="levelNum">Номер уровня</param>
         /// <param name="debugMode">Включить режим отладки (по умолчанию true)</param>
-        public void LoadLevel(int levelNum, bool debugMode = true)
+        public void LoadLevel(int levelNum, bool debugMode)
         {
-            _fileName += levelNum + _levelFileExt;
+            _fileName = $"{LevelChecker.FilePrefix}{levelNum}{_levelFileExt}";
 
-            if (!Directory.Exists(_saveFolder))
+            if (Application.platform != RuntimePlatform.Android)
             {
-                //TODO debug info
-                Debug.Log($"Не удалось найти директорию {_saveFolder}");
-                return;
-            }
+                if (!Directory.Exists(_saveFolder))
+                {
+                    //TODO debug info
+                    Debug.Log($"Не удалось найти директорию {_saveFolder}");
+                    return;
+                }
 
-            if (!File.Exists(_saveFolder + _fileName))
-            {
-                //TODO debug info
-                Debug.Log($"Не удалось найти игровой уровень {_saveFolder + _fileName}");
-                return;
+                if (!File.Exists(_saveFolder + _fileName))
+                {
+                    //TODO debug info
+                    Debug.Log($"Не удалось найти игровой уровень {_saveFolder + _fileName}");
+                    return;
+                }
             }
 
             GameObject wallsDir = GameObject.Find("Walls");
             GameObject starsDir = GameObject.Find("Stars");
             GameObject boxesDir = GameObject.Find("Boxes");
             GameObject fpsDir = GameObject.Find("Finish");
+            GameObject floorDir = GameObject.Find("Floor");
 
             Vector3 tmpVector3 = new Vector3();
 
-            foreach (var model in File.ReadAllLines(_saveFolder + _fileName))
+            string[] lines = null;
+            if (Application.platform == RuntimePlatform.Android)
             {
+                BetterStreamingAssets.Initialize();
+                lines = BetterStreamingAssets.ReadAllLines(_saveFolder + _fileName);
+            }
+            else
+            {
+                lines = File.ReadAllLines(_saveFolder + _fileName);
+            }
+
+            foreach (var model in lines)
+            {
+                if (model.Trim() == string.Empty) continue;
+
                 string[] data = model.Split('|');
                 if (data.Length == 0) continue;
 
-                EntityType entity = (EntityType) int.Parse(data[0].Trim());
-                tmpVector3.Set( int.Parse(data[1].Split(':')[0].Trim()),
-                                int.Parse(data[1].Split(':')[1].Trim()),
-                                int.Parse(data[1].Split(':')[2].Trim()));
+                int.TryParse(data[0].Trim(), out int entityTypeInt);
+                EntityType entity = (EntityType) entityTypeInt;
+
+                int.TryParse(data[1].Split(':')[0].Trim(), out int xPos);
+                int.TryParse(data[1].Split(':')[1].Trim(), out int yPos);
+                int.TryParse(data[1].Split(':')[2].Trim(), out int zPos);
+
+                tmpVector3.Set(xPos, yPos, zPos);
 
                 switch (entity)
                 {
                     case EntityType.Box:
                         var boxInst = GameObject.Instantiate(_boxPrefab, tmpVector3, Quaternion.identity, boxesDir.transform);
-                        boxInst.GetComponent<MailBox>().Color = (BoxColor)int.Parse(data[2].Trim());
+                        int.TryParse(data[2].Trim(), out int boxColor);
+                        boxInst.GetComponent<MailBox>().Color = (BoxColor) boxColor;
                         break;
                     case EntityType.Star:
                         GameObject.Instantiate(_starPrefab, tmpVector3, Quaternion.identity, starsDir.transform);
@@ -130,7 +161,11 @@ namespace Core.Controller
                         break;
                     case EntityType.FinishPoint:
                         var finishInst = GameObject.Instantiate(_finishPointPrefab, tmpVector3, Quaternion.identity, fpsDir.transform);
-                        finishInst.GetComponent<FinishPoint>().Color = (BoxColor)int.Parse(data[2].Trim());
+                        int.TryParse(data[2].Trim(), out int finishColor);
+                        finishInst.GetComponent<FinishPoint>().Color = (BoxColor) finishColor;
+                        break;
+                    case EntityType.Floor:
+                        GameObject.Instantiate(_floorPrefab, tmpVector3, Quaternion.identity, floorDir.transform);
                         break;
                 }
             }

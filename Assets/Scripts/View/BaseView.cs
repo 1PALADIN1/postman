@@ -7,18 +7,17 @@ namespace Core.View
     {
         [SerializeField]
         protected UIMarker _marker = UIMarker.None;
+        [SerializeField]
+        protected bool _isFixedPosition = false;
 
         protected bool _isActive;
+        [SerializeField]
+        protected bool _isEnabled = true;
 
-        public UIMarker UIMarker
-        {
-            get => _marker;
-        }
-
-        public bool IsActive
-        {
-            get => _isActive;
-        }
+        public UIMarker UIMarker => _marker;
+        public bool IsActive => _isActive;
+        public bool IsEnabled => _isEnabled;
+        public bool IsFixedPosition => _isFixedPosition;
 
         private void Start()
         {
@@ -30,6 +29,11 @@ namespace Core.View
         {
             _isActive = active;
             gameObject.SetActive(active);
+        }
+
+        public virtual void SetEnabled(bool isEnabled)
+        {
+            _isEnabled = isEnabled;
         }
 
         public abstract void Init();

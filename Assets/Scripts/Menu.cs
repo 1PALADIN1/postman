@@ -33,24 +33,34 @@ namespace Core
         private Pager<int> _pager;
         private LevelChecker _levelChecker;
         private AdaptiveView _adaptiveView;
+        private ProgressLoader _progressLoader;
 
+        //панельки
         private List<IPanel> _panelList;
         private BaseView _mainMenuPanel;
         private BaseView _levelPanel;
+        private BaseView _abouPanel;
+
+        //кнопки
+        private BaseView _nextPageButton;
+        private BaseView _prevPageButton;
 
         private void Start()
         {
-            _levelsPanel = GameObject.Find("LevelsPanel");
+            _levelsPanel = GameObject.Find("LevelButtons");
             Rect panelRect = _levelsPanel.GetComponent<RectTransform>().rect;
             _panelWidth = panelRect.width;
             _panelHeight = panelRect.height;
             _levelChecker = new LevelChecker();
             _adaptiveView = new AdaptiveView(_panelBrilliantWidth, _panelWidth);
 
+            //загрузка игрового прогресса
+            _progressLoader = new ProgressLoader();
+            _progressLoader.LoadGameProgress();
+
             InitPager();
             LoadPage(_pager.CurrentPageNumber);
-
-            //TODO подстроить весь код под архитектуру ниже
+            
             _panelList = new List<IPanel>();
 
             foreach (var view in GameObject.FindObjectsOfType<BaseView>())
@@ -68,13 +78,14 @@ namespace Core
                         case UIMarker.PanelMainMenu:
                             _mainMenuPanel = view;
                             _mainMenuPanel.SetActive(true);
-
-                            //TODO new feature
-                            _adaptiveView.AdaptateToPanelPosition(panel.GetAllChildButtonsAsBase(), panel, true);
                             break;
                         case UIMarker.PanelLevelList:
                             _levelPanel = view;
                             _levelPanel.SetActive(false);
+                            break;
+                        case UIMarker.PanelAbout:
+                            _abouPanel = view;
+                            _abouPanel.SetActive(false);
                             break;
                     }
                 }
@@ -90,11 +101,34 @@ namespace Core
                             button.SetAction(OpenLevelList);
                             break;
                         case UIMarker.ButtonLevel:
-                            button.SetAction(StartLevel);
+                            //button.SetAction(StartLevel);
+                            break;
+                        case UIMarker.ButtonAbout:
+                            button.SetAction(OpenAboutPanel);
+                            break;
+                        case UIMarker.ButtonQuit:
+                            button.SetAction(QuitGame);
+                            break;
+                        case UIMarker.ButtonBackToMainMenu:
+                            button.SetAction(BackToMenu);
+                            break;
+                        case UIMarker.ButtonNextPage:
+                            button.SetAction(GoNextPage);
+                            _nextPageButton = view;
+                            break;
+                        case UIMarker.ButtonPreviousPage:
+                            button.SetAction(GoPreviousPage);
+                            _prevPageButton = view;
                             break;
                     }
                 }
+            }
 
+            //адаптация кнопок к представлению
+            if (_levelPanel is IPanel)
+            {
+                IPanel panel = _levelPanel as IPanel;
+                _adaptiveView.AdaptateToPanelPosition(panel.GetAllChildButtonsAsBase(), panel, true, _buttonsInColumn, _buttonsInRow);
             }
         }
 
@@ -106,6 +140,8 @@ namespace Core
         {
             _mainMenuPanel.SetActive(false);
             _levelPanel.SetActive(true);
+
+            ActivatePageButtons();
         }
 
         /// <summary>
@@ -115,7 +151,77 @@ namespace Core
         {
             SceneManager.LoadScene("LevelScene");
         }
+
+        /// <summary>
+        /// Выход из игры
+        /// </summary>
+        private void QuitGame()
+        {
+            Application.Quit();
+        }
+
+        /// <summary>
+        /// Открытие окна "Об игре"
+        /// </summary>
+        private void OpenAboutPanel()
+        {
+            _mainMenuPanel.SetActive(false);
+            _abouPanel.SetActive(true);
+        }
+
+        /// <summary>
+        /// Возвращение в гланове меню
+        /// </summary>
+        private void BackToMenu()
+        {
+            if (_abouPanel.IsActive) _abouPanel.SetActive(false);
+            if (_levelPanel.IsActive) _levelPanel.SetActive(false);
+            _mainMenuPanel.SetActive(true);
+        }
+
+        /// <summary>
+        /// Перелистывает на страницу вперёд
+        /// </summary>
+        private void GoNextPage()
+        {
+            LoadPage(_pager.GetNextPageNumber());
+            ActivatePageButtons();
+        }
+
+        /// <summary>
+        /// Перелистывает на предыдущую страницу
+        /// </summary>
+        private void GoPreviousPage()
+        {
+            LoadPage(_pager.GetPrevPageNumber());
+            ActivatePageButtons();
+        }
         #endregion
+
+        private void ActivatePageButtons()
+        {
+            if (_pager.HasNextPage)
+            {
+                if (!_nextPageButton.IsActive)
+                    _nextPageButton.SetActive(true);
+            }
+            else
+            {
+                if (_nextPageButton.IsActive)
+                    _nextPageButton.SetActive(false);
+            }
+
+            if (_pager.HasPrevPage)
+            {
+                if (!_prevPageButton.IsActive)
+                    _prevPageButton.SetActive(true);
+            }
+            else
+            {
+                if (_prevPageButton.IsActive)
+                    _prevPageButton.SetActive(false);
+            }
+        }
 
         private void InitPager()
         {
@@ -127,9 +233,7 @@ namespace Core
         {
             ClearLevelButtons();
 
-            float insideButsX = _panelWidth * (1 - _widthPercent * 2) / _buttonsInColumn;
-            float insideButsY = _panelHeight * (1 - (_heightPercentTop + _heightPercentBottom)) / _buttonsInRow;
-
+            List<BaseView> baseButtons = new List<BaseView>();
             int[] pageElements = _pager.GetPage(pageNum);
             int levelCount = 0;
             bool isFinished = false;
@@ -150,14 +254,20 @@ namespace Core
 
                     if (buttonView != null)
                     {
+                        int levelNum = pageElements[levelCount];
                         buttonView.Init();
-                        buttonView.SetPosition(_panelWidth * _widthPercent + insideButsX * i + insideButsX / 2,
-                                                -(_panelHeight * _heightPercentTop + insideButsY * j + insideButsY / 2));
-
-                        _adaptiveView.AdaptateSize(buttonView);
-                        
                         buttonView.Text = pageElements[levelCount].ToString();
-                        buttonView.Level = pageElements[levelCount];
+                        buttonView.Level = levelNum;
+                        buttonView.SetAction(StartLevel);
+                        baseButtons.Add(buttonView);
+
+                        //делаем доступными кнопки в зависимости от прогресса
+                        if (levelNum <= _progressLoader.CanStartLevel)
+                            buttonView.SetEnabled(true);
+                        else
+                            buttonView.SetEnabled(false);
+
+                        buttonView.SetStarSprite(_progressLoader.StarsInLevel(levelNum));
 
                         levelCount++;
                     }
@@ -166,6 +276,13 @@ namespace Core
                 //выход из двойного цикла
                 if (isFinished)
                     break;
+            }
+
+            //адаптация кнопок к представлению
+            if (_levelPanel is IPanel)
+            {
+                IPanel panel = _levelPanel as IPanel;
+                _adaptiveView.AdaptateToPanelPosition(baseButtons.ToArray(), panel, true, _buttonsInColumn, _buttonsInRow);
             }
         }
 
@@ -186,11 +303,11 @@ namespace Core
         {
             //TODO debug
             if (Input.GetKeyDown(KeyCode.P))
-                LoadPage(_pager.GetNextPageNumber());
+                GoNextPage();
 
             //TODO debug
             if (Input.GetKeyDown(KeyCode.O))
-                LoadPage(_pager.GetPrevPageNumber());
+                GoPreviousPage();
         }
     }
 }

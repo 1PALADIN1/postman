@@ -1,4 +1,6 @@
-﻿using Core.Model;
+﻿using Core.Helper.Util;
+using Core.Model;
+using Core.View;
 using UnityEngine;
 
 namespace Core.Controller
@@ -7,6 +9,7 @@ namespace Core.Controller
     {
         private ICollectable[] _collectObjects;
         private GameStore _gameStore;
+        private OptionalObject<LevelCurrentStarsImageView> _currentStarsImageView;
         //количество собранных звёзд
         private int _currentStars = 0;
         //максимальное количество звёзд, которое можно собрать
@@ -32,6 +35,7 @@ namespace Core.Controller
         {
             _gameStore = GameStore.Store;
             _collectObjects = _gameStore.CollectObjects;
+            _currentStarsImageView = new OptionalObject<LevelCurrentStarsImageView>(_gameStore.CurrentStarsImageView);
 
             foreach (var collectObj in _collectObjects)
                 collectObj.SetCollect(OnCollect);
@@ -45,6 +49,8 @@ namespace Core.Controller
             Debug.Log($"Собрана звёздочка {star.name} коробочкой {box.name}");
 
             _currentStars++;
+            if (!_currentStarsImageView.HasValue) _currentStarsImageView.SetValue(_gameStore.CurrentStarsImageView);
+            _currentStarsImageView.Value.SetStarNumber(_currentStars);
         }
     }
 }
